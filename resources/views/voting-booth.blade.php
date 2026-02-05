@@ -181,10 +181,63 @@
             color: #d90429;
             margin-top: 3px;
         }
+
+        /* ===== ENTERPRISE LOADING OVERLAY ===== */
+        .vote-loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(6px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .vote-loading-box {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 16px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            max-width: 320px;
+            width: 90%;
+        }
+
+        .vote-spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid #e0e0e0;
+            border-top: 6px solid #0033a0;
+            border-right: 6px solid #d90429;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px auto;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .vote-loading-title {
+            font-weight: 700;
+            color: #0033a0;
+            font-size: 18px;
+        }
+
+        .vote-loading-sub {
+            color: #666;
+            font-size: 14px;
+            margin-top: 6px;
+        }
     </style>
 </head>
 
 <body>
+
 
     <div class="container header-container text-center">
         <h1 class="election-title">2026 COOP ELECTION</h1>
@@ -239,10 +292,32 @@
         </div>
     </div>
 
+    <!-- VOTE LOADING OVERLAY -->
+    <div id="voteLoading" class="vote-loading-overlay" style="display:none;">
+        <div class="vote-loading-box">
+            <div class="vote-spinner"></div>
+            <div class="vote-loading-title">Submitting Your Vote</div>
+            <div class="vote-loading-sub">Please wait while we securely record your ballot…</div>
+        </div>
+    </div>
+
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        function showVoteLoading() {
+            document.getElementById('voteLoading').style.display = 'flex';
+            document.body.style.pointerEvents = 'none'; // lock screen
+        }
+
+        function hideVoteLoading() {
+            document.getElementById('voteLoading').style.display = 'none';
+            document.body.style.pointerEvents = 'auto';
+        }
+
+
+
         let votes = {};
 
         function selectCandidate(card, deptId) {
@@ -312,6 +387,8 @@
                 candidateId: v.candidateId
             }));
 
+            showVoteLoading();
+
             fetch("{{ route('vote-submit') }}", {
                     method: "POST",
                     headers: {
@@ -322,6 +399,8 @@
                 })
                 .then(res => res.json())
                 .then(data => {
+                    hideVoteLoading();
+
                     Swal.fire({
                         title: '<span style="color:#002868; font-weight:bold;">Vote Submitted!</span>',
                         html: '<span style="color:#BF0A30;">Thank you for casting your vote.</span>',
@@ -343,6 +422,8 @@
                     });
                 })
                 .catch(err => {
+                    hideVoteLoading();
+
                     console.error(err);
                     alert("An error occurred. Please try again.");
                 });

@@ -49,6 +49,7 @@ class VotingService
         $curdate = DB::select('SELECT CURDATE()');
         $curtime = DB::select('SELECT CURTIME()');
 
+
         // Save votes
         foreach ($request->all() as $voteData) {
             Votes::create([
