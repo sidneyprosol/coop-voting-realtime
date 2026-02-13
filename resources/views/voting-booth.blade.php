@@ -400,6 +400,8 @@
                 .then(res => res.json())
                 .then(data => {
                     hideVoteLoading();
+                    // Reset votes object
+                    votes = {};
 
                     Swal.fire({
                         title: '<span style="color:#002868; font-weight:bold;">Vote Submitted!</span>',

@@ -109,6 +109,7 @@
         <a href="{{ route('admin-members') }}">Members</a>
         <a href="{{ route('admin-candidates') }}">Candidates</a>
         <a href="{{ route('admin-departments') }}">Departments</a>
+        <a href="{{ route('admin-vote-list') }}">Votes</a>
         <a href="#" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">
             Logout
         </a>

@@ -37,9 +37,6 @@ class VotingService
 
     public function voteSubmit($request)
     {
-        //return auth()->user()->id;
-        //return $request->input();
-        // Validate
         $request->validate([
             '*.departmentId' => 'required|exists:departments,id',
             '*.candidateId' => 'required|exists:candidates,id',
@@ -84,6 +81,15 @@ class VotingService
 
         return [
             'departments' => $departments
+        ];
+    }
+
+    public function getAllVotes()
+    {
+        $votes = Votes::get();
+
+        return [
+            'votes' => $votes
         ];
     }
 }

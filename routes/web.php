@@ -15,6 +15,9 @@ Route::middleware(['auth', 'prevent-back-history'])->group(function () {
     Route::get('/admin-import-member', [App\Http\Controllers\AdminController::class, 'index'])->name('admin-import-member');
     Route::post('/admin-migration-process', [App\Http\Controllers\AdminController::class, 'adminMigrationProcess'])->name('admin-migration-process');
 
+    Route::get('/admin-vote-list', [App\Http\Controllers\VoteListController::class, 'index'])->name('admin-vote-list');
+
+
     Route::get('/admin-departments', [App\Http\Controllers\AdminDepartmentController::class, 'index'])->name('admin-departments');
     Route::post('/admin-department-process', [App\Http\Controllers\AdminDepartmentController::class, 'adminDepartmentProcess'])->name('admin-department-process');
 
