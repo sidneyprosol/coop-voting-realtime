@@ -50,7 +50,7 @@
                     <input type="text" class="form-control" required name="passCode" placeholder="Enter Passcode">
                 </div>
                 <div class="col-md-12">
-                    <button class="btn btn-sm float-end btn-success" type="submit">Register New Member</button>
+                    <button class="btn btn-sm float-end btn-success mt-3" type="submit">Register New Member</button>
                 </div>
             </div>
         </form>

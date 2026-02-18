@@ -269,7 +269,7 @@
 
     </div>
 
-    <div class="step-indicator" id="stepIndicator">Voted 1 of {{ count($departments) }}</div>
+    {{-- <div class="step-indicator" id="stepIndicator">Voted 1 of {{ count($departments) }}</div> --}}
 
     <!-- Modal -->
     <div class="modal fade" id="voteModal" tabindex="-1" aria-hidden="true">
@@ -353,8 +353,8 @@
 
         function submitVote() {
             const selectedCount = Object.keys(votes).length;
-            if (selectedCount < 3) {
-                alert(`Please select at least 3 candidates before submitting.\nCurrently selected: ${selectedCount}`);
+            if (selectedCount < 5) {
+                alert(`Please select at least 5 candidates before submitting.\nCurrently selected: ${selectedCount}`);
                 return;
             }
 

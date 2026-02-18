@@ -3,7 +3,7 @@
 @section('title', 'Dashboard - 2026 COOP ELECTIONS')
 
 @section('content')
-    <h2 class="mb-4">List of Members</h2>
+    <h2 class="mb-4">Vote Data</h2>
 
     <div class="form-section mt-3">
 

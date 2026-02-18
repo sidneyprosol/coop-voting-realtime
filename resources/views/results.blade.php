@@ -99,19 +99,27 @@
             departments: @json($departments)
         };
 
+        /* =========================
+           PENDING VOTE BUFFER
+        ========================== */
+        let pendingVotes = [];
+
+        /* =========================
+           RENDER RESULTS
+        ========================== */
         function renderResults() {
             let container = document.getElementById("resultsContainer");
             container.innerHTML = "";
 
             data.departments.forEach(dept => {
 
-                // SORT initially
                 dept.candidates.sort((a, b) => b.votes_count - a.votes_count);
 
                 let totalVotes = dept.candidates.reduce((sum, c) => sum + c.votes_count, 0);
 
                 let candidatesHTML = dept.candidates.map(c => {
                     let percent = totalVotes ? ((c.votes_count / totalVotes) * 100).toFixed(1) : 0;
+
                     return `
 <div class="candidate-row mb-3 p-2 rounded"
      id="candidate-${c.id}"
@@ -149,12 +157,18 @@
             });
         }
 
+        /* =========================
+           SMOOTH UPDATE
+        ========================== */
         function smoothVoteUpdate(candidateId) {
+
             data.departments.forEach(dept => {
+
                 let totalVotes = dept.candidates.reduce((s, c) => s + c.votes_count, 0);
                 document.getElementById(`total-${dept.id}`).innerText = totalVotes;
 
                 dept.candidates.forEach(c => {
+
                     const row = document.getElementById(`candidate-${c.id}`);
                     if (!row) return;
 
@@ -166,14 +180,15 @@
                     row.querySelector(".vote-bar").style.width = percent + "%";
                 });
 
-                // SORT DESC
                 dept.candidates.sort((a, b) => b.votes_count - a.votes_count);
+
                 const cardBody = document.getElementById(`dept-body-${dept.id}`);
 
                 dept.candidates.forEach(c => {
                     const el = document.getElementById(`candidate-${c.id}`);
-                    cardBody.appendChild(el); // smooth DOM move
+                    cardBody.appendChild(el);
                 });
+
             });
 
             const votedRow = document.getElementById(`candidate-${candidateId}`);
@@ -183,7 +198,46 @@
             }
         }
 
-        /* TIMER + STATUS */
+
+        /* =========================
+           BATCH PROCESSOR (30 sec)
+        ========================== */
+        function processBatchVotes() {
+
+            if (pendingVotes.length === 0) return;
+
+            let updatedCandidates = new Set();
+
+            pendingVotes.forEach(candidateId => {
+
+                data.departments.forEach(dept => {
+                    dept.candidates.forEach(c => {
+
+                        if (c.id == candidateId) {
+                            c.votes_count++;
+                            updatedCandidates.add(candidateId);
+                        }
+
+                    });
+                });
+
+            });
+
+            updatedCandidates.forEach(id => {
+                smoothVoteUpdate(id);
+            });
+
+            console.log("Batch applied:", pendingVotes.length, "votes");
+
+            pendingVotes = [];
+        }
+
+        setInterval(processBatchVotes, 60000); // every 30 seconds
+
+
+        /* =========================
+           TIMER + STATUS
+        ========================== */
         function parseTimeToDate(timeStr) {
             const [h, m, s] = timeStr.split(':').map(Number);
             const d = new Date();
@@ -192,67 +246,87 @@
         }
 
         function startCountdown(targetTime) {
+
             const el = document.getElementById("countdown");
 
             function update() {
+
                 const now = new Date();
                 const diff = targetTime - now;
+
                 if (diff <= 0) {
                     location.reload();
                     return;
                 }
+
                 const hrs = Math.floor(diff / (1000 * 60 * 60));
                 const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                 const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
                 el.innerHTML =
                     `${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
             }
+
             update();
             setInterval(update, 1000);
         }
 
         function checkVotingStatus() {
+
             const now = new Date();
             const start = parseTimeToDate(VOTE_TIME_START);
             const end = parseTimeToDate(VOTE_TIME_END);
+
             const timeStatus = document.getElementById("timeStatus");
 
             if (now < start) {
+
                 timeStatus.innerHTML =
                     `Voting not started.<br>Starts in: <span id="countdown" class="fw-bold text-warning"></span>`;
+
                 startCountdown(start);
                 return false;
+
             } else if (now <= end) {
+
                 timeStatus.innerHTML =
-                    `Voting ongoing. Live updates enabled.<br>Ends in: <span id="countdown" class="fw-bold text-light"></span>`;
+                    `Voting ongoing. Live updates enabled.<br>
+                 Results refresh every 30 seconds.<br>
+                 Ends in: <span id="countdown" class="fw-bold text-light"></span>`;
+
                 startCountdown(end);
                 return true;
+
             } else {
+
                 timeStatus.innerHTML = "Voting ended.";
                 return false;
             }
         }
 
-        /* INIT */
+
+        /* =========================
+           INIT
+        ========================== */
         renderResults();
 
         document.addEventListener("DOMContentLoaded", function() {
+
             if (checkVotingStatus()) {
+
                 window.Echo.channel('election-channel')
                     .listen('.vote.submitted', (e) => {
-                        let candidateId = e.candidateId;
 
-                        data.departments.forEach(dept => {
-                            dept.candidates.forEach(c => {
-                                if (c.id == candidateId) c.votes_count++;
-                            });
-                        });
+                        // STORE ONLY (no instant display)
+                        pendingVotes.push(e.candidateId);
 
-                        smoothVoteUpdate(candidateId);
                     });
+
             }
+
         });
     </script>
+
 </body>
 
 </html>
