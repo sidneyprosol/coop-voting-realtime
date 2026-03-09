@@ -4,7 +4,7 @@ use App\Http\Controllers\AdminCandidateController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
+Route::get('/04958392', function () {
     return view('auth.login');
 });
 
@@ -12,8 +12,6 @@ Auth::routes();
 
 Route::middleware(['auth', 'prevent-back-history'])->group(function () {
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-    Route::get('/admin-import-member', [App\Http\Controllers\AdminController::class, 'index'])->name('admin-import-member');
-    Route::post('/admin-migration-process', [App\Http\Controllers\AdminController::class, 'adminMigrationProcess'])->name('admin-migration-process');
 
     Route::get('/admin-vote-list', [App\Http\Controllers\VoteListController::class, 'index'])->name('admin-vote-list');
 
@@ -34,6 +32,9 @@ Route::middleware(['auth', 'prevent-back-history'])->group(function () {
     Route::post('/vote-submit', [App\Http\Controllers\VotingBoothController::class, 'voteSubmit'])->name('vote-submit');
 });
 
-
+Route::get('/logout', [App\Http\Controllers\AdminController::class, 'logout'])->name('logout');
+Route::get('/admin-import-member', [App\Http\Controllers\AdminController::class, 'index'])->name('admin-import-member');
+Route::post('/admin-migration-process', [App\Http\Controllers\AdminController::class, 'adminMigrationProcess'])->name('admin-migration-process');
 Route::get('/results', [App\Http\Controllers\ResultsController::class, 'index'])->name('results');
+Route::get('/', [App\Http\Controllers\ResultsController::class, 'index'])->name('results');
 Route::post('/admin-logout', [App\Http\Controllers\AdminController::class, 'logout'])->name('admin-logout');

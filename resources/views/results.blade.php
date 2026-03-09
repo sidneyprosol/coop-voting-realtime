@@ -125,20 +125,30 @@
      id="candidate-${c.id}"
      data-id="${c.id}"
      data-votes="${c.votes_count}">
+
+
     <div class="d-flex align-items-center">
-        <img src="/${c.photo}" class="rounded-circle me-3 shadow"
-             style="width:55px;height:55px;object-fit:cover;border:3px solid #0d6efd;">
-        <div class="flex-grow-1">
-            <div class="d-flex justify-content-between">
-               ${c.candidateName}
-               <span class="fw-bold text-danger vote-count">${c.votes_count} votes (${percent}%)</span>
-            </div>
-            <div class="progress mt-1">
-                <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated vote-bar"
-                     style="width:${percent}%"></div>
-            </div>
+    <img src="/${c.photo}"
+         class="rounded-circle me-3 shadow"
+         style="width:55px;height:55px;object-fit:cover;border:3px solid #0d6efd;">
+
+    <div class="flex-grow-1">
+
+       <div class="d-flex justify-content-between align-items-center">
+            <span class="fw-semibold small text-nowrap">${c.candidateName}</span>
+
+            <span class="fw-bold text-danger vote-count small text-end">
+                ${c.votes_count} votes (${percent}%)
+            </span>
         </div>
+
+        <div class="progress mt-1">
+            <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated vote-bar"
+                 style="width:${percent}%"></div>
+        </div>
+
     </div>
+</div>
 </div>`;
                 }).join('');
 
@@ -232,7 +242,7 @@
             pendingVotes = [];
         }
 
-        setInterval(processBatchVotes, 60000); // every 30 seconds
+        setInterval(processBatchVotes, 10000); // every 30 seconds
 
 
         /* =========================
@@ -291,7 +301,7 @@
 
                 timeStatus.innerHTML =
                     `Voting ongoing. Live updates enabled.<br>
-                 Results refresh every 30 seconds.<br>
+                 Results refresh every 10 seconds.<br>
                  Ends in: <span id="countdown" class="fw-bold text-light"></span>`;
 
                 startCountdown(end);

@@ -17,11 +17,12 @@ class AdminController extends Controller
 
     public function index()
     {
-        if (Auth::check()) {
-            return view('admin-migration');
-        } else {
-            return redirect('/')->with('error', 'Session Expired. Please Login Again!');
-        }
+        return view('admin-migration');
+        // if (Auth::check()) {
+        //     return view('admin-migration');
+        // } else {
+        //     return redirect('/')->with('error', 'Session Expired. Please Login Again!');
+        // }
     }
 
     public function adminMigrationProcess(Request $request)
@@ -40,7 +41,8 @@ class AdminController extends Controller
         // 3. Regenerate CSRF token
         request()->session()->regenerateToken();
 
-        // 4. Redirect to login page with optional message
-        return redirect()->route('login')->with('success', 'Logged out successfully!');
+        // // 4. Redirect to login page with optional message
+        // return redirect()->route('/login')->with('success', 'Logged out successfully!');
+        return redirect('/04958392')->with('success', 'Logged out successfully!');
     }
 }

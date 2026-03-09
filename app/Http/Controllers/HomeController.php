@@ -39,29 +39,29 @@ class HomeController extends Controller
             $dateString = $curdate[0]->{'CURDATE()'};
             $timeString = $curtime[0]->{'CURTIME()'};
 
-
             if ($dateString == env('VOTING_DATE')) {
                 if ($timeString >= env('TIME_START')  &&  $timeString <= env('TIME_END')) {
                     $voteServicesParameter = $this->votingService->voteChecker();
                     if ($voteServicesParameter['checker'] == "granted") {
                         return redirect('voting-booth');
                     } else {
+
                         Auth::logout();
                         $request->session()->invalidate();
                         $request->session()->regenerateToken();
-                        return redirect('/')->with('error', 'You have already casted your vote. Voting again is not allowed!');
+                        return redirect('/04958392')->with('error', 'You have already casted your vote. Voting again is not allowed!');
                     }
                 } else {
                     Auth::logout();
                     $request->session()->invalidate();
                     $request->session()->regenerateToken();
-                    return redirect('/')->with('error', 'Voting has ended. You are no longer able to cast a vote!');
+                    return redirect('/04958392')->with('error', 'Voting has ended. You are no longer able to cast a vote!');
                 }
             } else {
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
-                return redirect('/')->with('error', 'Login not allowed!');
+                return redirect('/04958392')->with('error', 'Login not allowed!');
             }
         }
     }

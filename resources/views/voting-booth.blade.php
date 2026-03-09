@@ -241,7 +241,8 @@
 
     <div class="container header-container text-center">
         <h1 class="election-title">2026 COOP ELECTION</h1>
-        <h3 class="page-title mb-0">🗳 VOTING BOOTH</h3>
+        {{-- <h3 class="page-title mb-0">🗳 VOTING BOOTH</h3> --}}
+        <h3 class="page-title mb-0">Welcome! {{ auth()->user()->firstName . ', ' . auth()->user()->lastName }}</h3>
     </div>
 
     <div class="container my-4">
@@ -316,8 +317,6 @@
             document.body.style.pointerEvents = 'auto';
         }
 
-
-
         let votes = {};
 
         function selectCandidate(card, deptId) {
@@ -347,31 +346,41 @@
 
             // Update step indicator
             let allDepartments = document.querySelectorAll('.department-box');
-            let currentIndex = Array.from(allDepartments).indexOf(card.closest('.department-box'));
-            document.getElementById('stepIndicator').innerText = `Voted ${currentIndex + 1} of ${allDepartments.length}`;
+            // let currentIndex = Array.from(allDepartments).indexOf(card.closest('.department-box'));
+            // document.getElementById('stepIndicator').innerText = `Voted ${currentIndex + 1} of ${allDepartments.length}`;
         }
 
         function submitVote() {
             const selectedCount = Object.keys(votes).length;
-            if (selectedCount < 5) {
-                alert(`Please select at least 5 candidates before submitting.\nCurrently selected: ${selectedCount}`);
+            if (selectedCount < 1) {
+                alert(`Please select at least 1 candidate before submitting.\nCurrently selected: ${selectedCount}`);
                 return;
             }
 
-            // Prepare modal summary with modern card layout
+            let voteArray = Object.values(votes);
+
+            // SQL-like sorting
+            voteArray.sort((a, b) => {
+                if (a.departmentName === "Maintenance Department" && b.departmentName !== "Maintenance Department")
+                    return -1;
+                if (b.departmentName === "Maintenance Department" && a.departmentName !== "Maintenance Department")
+                    return 1;
+
+                return a.departmentName.localeCompare(b.departmentName);
+            });
+
             let summaryHTML = '';
-            for (let key in votes) {
-                const vote = votes[key];
+            voteArray.forEach(vote => {
                 summaryHTML += `
-                    <div class="modal-vote-card">
-                        <div class="dept-name">${vote.departmentName}</div>
-                        <div class="candidate-name">${vote.candidateName}</div>
-                    </div>
-                `;
-            }
+            <div class="modal-vote-card">
+                <div class="dept-name">${vote.departmentName}</div>
+                <div class="candidate-name">${vote.candidateName}</div>
+            </div>
+        `;
+            });
+
             document.getElementById('modalBody').innerHTML = summaryHTML;
 
-            // Show modal
             let voteModal = new bootstrap.Modal(document.getElementById('voteModal'));
             voteModal.show();
 
@@ -381,6 +390,36 @@
             };
         }
 
+        // function submitVote() {
+        //     const selectedCount = Object.keys(votes).length;
+        //     if (selectedCount < 1) {
+        //         alert(`Please select at least 1 candidate before submitting.\nCurrently selected: ${selectedCount}`);
+        //         return;
+        //     }
+
+        //     // Prepare modal summary with modern card layout
+        //     let summaryHTML = '';
+        //     for (let key in votes) {
+        //         const vote = votes[key];
+        //         summaryHTML += `
+    //             <div class="modal-vote-card">
+    //                 <div class="dept-name">${vote.departmentName}</div>
+    //                 <div class="candidate-name">${vote.candidateName}</div>
+    //             </div>
+    //         `;
+        //     }
+        //     document.getElementById('modalBody').innerHTML = summaryHTML;
+
+        //     // Show modal
+        //     let voteModal = new bootstrap.Modal(document.getElementById('voteModal'));
+        //     voteModal.show();
+
+        //     document.getElementById('confirmVoteBtn').onclick = () => {
+        //         voteModal.hide();
+        //         sendVote();
+        //     };
+        // }
+
         function sendVote() {
             let payload = Object.values(votes).map(v => ({
                 departmentId: v.departmentId,
@@ -389,7 +428,7 @@
 
             showVoteLoading();
 
-            fetch("{{ route('vote-submit') }}", {
+            fetch("/vote-submit", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -420,7 +459,7 @@
                             popup: 'animate__animated animate__fadeOutUp'
                         }
                     }).then(() => {
-                        window.location.href = '/login';
+                        window.location.href = '/04958392';
                     });
                 })
                 .catch(err => {

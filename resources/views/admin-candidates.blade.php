@@ -168,7 +168,7 @@
                 formData.append('fileId', fileId);
                 formData.append('_token', '{{ csrf_token() }}');
 
-                fetch("{{ route('chunk.upload') }}", {
+                fetch("/chunk-upload", {
                         method: 'POST',
                         body: formData
                     })

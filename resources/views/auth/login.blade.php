@@ -132,7 +132,7 @@
                         <!-- User Number -->
                         <div class="mb-3">
                             <div class="form-floating">
-                                <input id="userNumber" type="text"
+                                <input id="userNumber" type="number"
                                     class="form-control @error('userNumber') is-invalid @enderror" name="userNumber"
                                     value="{{ old('userNumber') }}" placeholder="User Number" required>
                                 <label for="userNumber">{{ __('User Number') }}</label>
@@ -145,7 +145,7 @@
                         <!-- Passcode -->
                         <div class="mb-3">
                             <div class="form-floating">
-                                <input id="password" type="password"
+                                <input id="password" type="number"
                                     class="form-control @error('password') is-invalid @enderror" name="password"
                                     placeholder="Passcode" required>
                                 <label for="password">{{ __('Passcode') }}</label>

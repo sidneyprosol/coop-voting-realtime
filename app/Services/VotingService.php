@@ -77,6 +77,8 @@ class VotingService
     public function getCandidates()
     {
         $departments = Departments::select('id', 'departmentName')
+            ->orderByRaw("departmentName = 'Maintenance Department' DESC")
+            ->orderBy('departmentName', 'ASC')
             ->get();
 
         return [

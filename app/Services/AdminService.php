@@ -222,7 +222,6 @@ class AdminService
     {
         ini_set('max_execution_time', 300);
 
-        // 1️⃣ Validate uploaded CSV
         $request->validate([
             'csvFile' => 'required|mimes:csv,txt|max:2048',
         ]);
@@ -231,23 +230,20 @@ class AdminService
         $fileHandle = fopen($file->getRealPath(), 'r');
 
         if (!$fileHandle) {
-            return redirect()->back()->with('error', 'Cannot open uploaded CSV file.');
+            return back()->with('error', 'Cannot open uploaded CSV file.');
         }
 
-        // 2️⃣ Read header row
         $header = fgetcsv($fileHandle);
         if (!$header) {
-            return redirect()->back()->with('error', 'CSV file is empty or invalid.');
+            return back()->with('error', 'CSV file is empty or invalid.');
         }
 
+        $batchSize = 500;
         $insertData = [];
-        $rowNumber = 1;
+        $processed = 0;
 
-        // 3️⃣ Loop CSV rows and prepare data
         while (($row = fgetcsv($fileHandle)) !== false) {
-            $rowNumber++;
 
-            // Skip if userNumber is empty
             if (empty($row[3])) {
                 continue;
             }
@@ -256,31 +252,103 @@ class AdminService
                 'firstName'     => $row[1] ?? null,
                 'lastName'      => $row[2] ?? null,
                 'userNumber'    => $row[3] ?? null,
-                'password'      => Hash::make($row[4] ?? null), // Laravel 12 auto-hashes
+                'password'      => !empty($row[4]) ? Hash::make($row[4]) : null,
                 'departmentId'  => $row[5] ?? null,
                 'access'        => strtolower($row[6] ?? 'member'),
                 'created_at'    => now(),
                 'updated_at'    => now(),
             ];
+
+            $processed++;
+
+            if (count($insertData) === $batchSize) {
+                \App\Models\User::upsert(
+                    $insertData,
+                    ['userNumber'],
+                    ['firstName', 'lastName', 'password', 'departmentId', 'access', 'updated_at']
+                );
+
+                $insertData = []; // clear memory
+            }
         }
 
         fclose($fileHandle);
 
+        // Insert remaining rows
         if (!empty($insertData)) {
-            try {
-                // 4️⃣ Bulk upsert (insert or update)
-                \App\Models\User::upsert(
-                    $insertData,
-                    ['userNumber'], // unique key for update
-                    ['firstName', 'lastName', 'password', 'departmentId', 'access', 'updated_at'] // columns to update
-                );
-
-                return redirect()->back()->with('success', 'CSV data has been processed successfully!');
-            } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Error processing CSV: ' . $e->getMessage());
-            }
-        } else {
-            return redirect()->back()->with('error', 'No valid data found in CSV.');
+            \App\Models\User::upsert(
+                $insertData,
+                ['userNumber'],
+                ['firstName', 'lastName', 'password', 'departmentId', 'access', 'updated_at']
+            );
         }
+
+        return back()->with('success', "$processed records processed successfully!");
     }
+
+    // public function adminMigrationProcess($request)
+    // {
+    //     ini_set('max_execution_time', 300);
+
+    //     // 1️⃣ Validate uploaded CSV
+    //     $request->validate([
+    //         'csvFile' => 'required|mimes:csv,txt|max:2048',
+    //     ]);
+
+    //     $file = $request->file('csvFile');
+    //     $fileHandle = fopen($file->getRealPath(), 'r');
+
+    //     if (!$fileHandle) {
+    //         return redirect()->back()->with('error', 'Cannot open uploaded CSV file.');
+    //     }
+
+    //     // 2️⃣ Read header row
+    //     $header = fgetcsv($fileHandle);
+    //     if (!$header) {
+    //         return redirect()->back()->with('error', 'CSV file is empty or invalid.');
+    //     }
+
+    //     $insertData = [];
+    //     $rowNumber = 1;
+
+    //     // 3️⃣ Loop CSV rows and prepare data
+    //     while (($row = fgetcsv($fileHandle)) !== false) {
+    //         $rowNumber++;
+
+    //         // Skip if userNumber is empty
+    //         if (empty($row[3])) {
+    //             continue;
+    //         }
+
+    //         $insertData[] = [
+    //             'firstName'     => $row[1] ?? null,
+    //             'lastName'      => $row[2] ?? null,
+    //             'userNumber'    => $row[3] ?? null,
+    //             'password'      => Hash::make($row[4] ?? null), // Laravel 12 auto-hashes
+    //             'departmentId'  => $row[5] ?? null,
+    //             'access'        => strtolower($row[6] ?? 'member'),
+    //             'created_at'    => now(),
+    //             'updated_at'    => now(),
+    //         ];
+    //     }
+
+    //     fclose($fileHandle);
+
+    //     if (!empty($insertData)) {
+    //         try {
+    //             // 4️⃣ Bulk upsert (insert or update)
+    //             \App\Models\User::upsert(
+    //                 $insertData,
+    //                 ['userNumber'], // unique key for update
+    //                 ['firstName', 'lastName', 'password', 'departmentId', 'access', 'updated_at'] // columns to update
+    //             );
+
+    //             return redirect()->back()->with('success', 'CSV data has been processed successfully!');
+    //         } catch (\Exception $e) {
+    //             return redirect()->back()->with('error', 'Error processing CSV: ' . $e->getMessage());
+    //         }
+    //     } else {
+    //         return redirect()->back()->with('error', 'No valid data found in CSV.');
+    //     }
+    // }
 }
